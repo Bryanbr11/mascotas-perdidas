@@ -1,0 +1,98 @@
+{% extends 'mascotas/base.html' %}
+
+{% block title %}Iniciar Sesión - Mascotas Perdidas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</h2>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>¡Error!</strong> Usuario o contraseña incorrectos. Por favor, inténtalo de nuevo.
+                    </div>
+                {% endif %}
+
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">
+                            Nombre de usuario o correo electrónico
+                        </label>
+                        <input type="text" name="{{ form.username.name }}" 
+                               class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                               id="{{ form.username.id_for_label }}" 
+                               value="{{ form.username.value|default:'' }}" 
+                               required>
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.username.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">
+                            Contraseña
+                        </label>
+                        <input type="password" name="{{ form.password.name }}" 
+                               class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                               id="{{ form.password.id_for_label }}" 
+                               required>
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.password.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+
+                <hr>
+                
+                <p class="text-center mb-0">
+                    ¿No tienes una cuenta? 
+                    <a href="{% url 'signup' %}" class="fw-bold">Regístrate aquí</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validación del formulario
+(function () {
+    'use strict'
+
+    // Obtener todos los formularios a los que queremos aplicar estilos de validación de Bootstrap
+    var forms = document.querySelectorAll('.needs-validation')
+
+    // Bucle sobre ellos y evitar el envío
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}

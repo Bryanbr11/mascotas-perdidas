@@ -1,0 +1,153 @@
+{% extends 'mascotas/base.html' %}
+
+{% block title %}{{ mascota.nombre }} - Mascota {{ mascota.get_estado_display }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'mascotas:lista_mascotas' %}">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ mascota.nombre }}</li>
+            </ol>
+        </nav>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {% if mascota.foto %}
+                            <img src="{{ mascota.foto.url }}" class="img-fluid rounded" alt="{{ mascota.nombre }}">
+                        {% else %}
+                            <div class="text-center py-5 bg-light rounded">
+                                <i class="bi bi-image" style="font-size: 8rem; color: #6c757d;"></i>
+                                <p class="mt-2">Sin imagen</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <span class="badge bg-{% if mascota.estado == 'perdido' %}danger{% elif mascota.estado == 'encontrado' %}success{% else %}info{% endif %} mb-3">
+                            {{ mascota.get_estado_display|upper }}
+                        </span>
+                        <h1 class="h2">{{ mascota.nombre }}</h1>
+                        
+                        <div class="mb-4">
+                            <p class="mb-1">
+                                <strong><i class="bi bi-tag"></i> Tipo:</strong> {{ mascota.get_tipo_display }}
+                            </p>
+                            {% if mascota.raza %}
+                                <p class="mb-1">
+                                    <strong><i class="bi bi-star"></i> Raza:</strong> {{ mascota.raza }}
+                                </p>
+                            {% endif %}
+                            <p class="mb-1">
+                                <strong><i class="bi bi-calendar"></i> Fecha de {{ mascota.estado }}:</strong> 
+                                {{ mascota.fecha_perdida|date:"d/m/Y" }}
+                            </p>
+                            <p class="mb-1">
+                                <strong><i class="bi bi-geo-alt"></i> Lugar:</strong> {{ mascota.lugar_perdida }}
+                            </p>
+                            <p class="mb-1">
+                                <strong><i class="bi bi-person"></i> Publicado por:</strong> 
+                                {{ mascota.usuario.username }}
+                            </p>
+                            <p class="mb-0">
+                                <strong><i class="bi bi-clock"></i> Publicado el:</strong> 
+                                {{ mascota.fecha_publicacion|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading"><i class="bi bi-info-circle"></i> Información de contacto</h5>
+                            <p class="mb-1"><i class="bi bi-telephone"></i> {{ mascota.telefono_contacto }}</p>
+                            <p class="mb-0"><i class="bi bi-envelope"></i> {{ mascota.email_contacto }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5><i class="bi bi-card-text"></i> Descripción</h5>
+                    <p class="lead">{{ mascota.descripcion }}</p>
+                </div>
+
+                {% if user == mascota.usuario %}
+                    <div class="mt-4 pt-3 border-top">
+                        <h5>Acciones</h5>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'mascotas:editar_mascota' mascota.id %}" class="btn btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form method="post" action="{% url 'mascotas:eliminar_mascota' mascota.id %}" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta mascota? Esta acción no se puede deshacer.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
+                            {% if mascota.estado == 'perdido' %}
+                                <a href="{% url 'mascotas:marcar_encontrada' mascota.id %}" class="btn btn-success" onclick="return confirm('¿Estás seguro de marcar esta mascota como encontrada?');">
+                                    <i class="bi bi-check-circle"></i> Marcar como encontrado
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> ¿Has visto a {{ mascota.nombre }}?</h5>
+            </div>
+            <div class="card-body">
+                <p>Si has visto a {{ mascota.nombre }} o tienes alguna información, por favor contacta a su dueño:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-telephone"></i> <strong>Teléfono:</strong> {{ mascota.telefono_contacto }}</li>
+                    <li class="mb-2"><i class="bi bi-envelope"></i> <strong>Email:</strong> {{ mascota.email_contacto }}</li>
+                </ul>
+                <p class="text-muted small">
+                    <i class="bi bi-shield-lock"></i> Tu privacidad es importante. No compartas información personal con desconocidos.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-share"></i> Compartir</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-around">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
+                       target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?text=He%20visto%20a%20{{ mascota.nombre|urlencode }}%20{{ mascota.get_estado_display|urlencode }}&url={{ request.build_absolute_uri }}" 
+                       target="_blank" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-twitter"></i> Twitter
+                    </a>
+                    <a href="whatsapp://send?text=Mira%20esta%20mascota%20{{ mascota.get_estado_display|urlencode }}%3A%20{{ request.build_absolute_uri|urlencode }}" 
+                       class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Script para manejar los botones de compartir
+    document.addEventListener('DOMContentLoaded', function() {
+        // Asegurarse de que los enlaces de compartir se abran en una nueva pestaña
+        document.querySelectorAll('a[href^="http"]').forEach(link => {
+            if (!link.getAttribute('target')) {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            }
+        });
+    });
+</script>
+{% endblock %}

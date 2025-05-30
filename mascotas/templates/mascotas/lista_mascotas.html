@@ -1,0 +1,161 @@
+{% extends 'mascotas/base.html' %}
+
+{% block title %}Mascotas Perdidas - Inicio{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="bi bi-search-heart"></i> Mascotas Perdidas</h1>
+        <p class="lead">Ayudamos a reunir a las mascotas perdidas con sus dueños.</p>
+    </div>
+    {% if user.is_authenticated %}
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'mascotas:nueva_mascota' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Reportar Mascota Perdida
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select name="tipo" id="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="perro" {% if request.GET.tipo == 'perro' %}selected{% endif %}>Perro</option>
+                    <option value="gato" {% if request.GET.tipo == 'gato' %}selected{% endif %}>Gato</option>
+                    <option value="otro" {% if request.GET.tipo == 'otro' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="perdido" {% if request.GET.estado == 'perdido' %}selected{% endif %}>Perdido</option>
+                    <option value="encontrado" {% if request.GET.estado == 'encontrado' %}selected{% endif %}>Encontrado</option>
+                    <option value="en_adopcion" {% if request.GET.estado == 'en_adopcion' %}selected{% endif %}>En adopción</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="q" class="form-label">Buscar</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="q" name="q" placeholder="Nombre o descripción..." value="{{ request.GET.q }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <a href="{% url 'mascotas:lista_mascotas' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de mascotas -->
+{% if mascotas %}
+    <div class="row">
+        {% for mascota in mascotas %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    {% if mascota.foto %}
+                        <img src="{{ mascota.foto.url }}" class="card-img-top pet-img" alt="{{ mascota.nombre }}">
+                    {% else %}
+                        <div class="text-center py-5 bg-light">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #6c757d;"></i>
+                        </div>
+                    {% endif %}
+                    <span class="badge bg-{% if mascota.estado == 'perdido' %}danger{% elif mascota.estado == 'encontrado' %}success{% else %}info{% endif %} status-badge">
+                        {{ mascota.get_estado_display|upper }}
+                    </span>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ mascota.nombre }}</h5>
+                        <p class="card-text">
+                            <i class="bi bi-tag"></i> {{ mascota.get_tipo_display }}
+                            {% if mascota.raza %}| {{ mascota.raza }}{% endif %}
+                        </p>
+                        <p class="card-text text-muted small">
+                            <i class="bi bi-geo-alt"></i> {{ mascota.lugar_perdida }}<br>
+                            <i class="bi bi-calendar"></i> {{ mascota.fecha_perdida|date:"d/m/Y" }}
+                        </p>
+                        <a href="{% url 'mascotas:detalle_mascota' mascota.id %}" class="btn btn-outline-primary w-100">
+                            Ver detalles <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if mascotas.has_other_pages %}
+    <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+            {% if mascotas.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ mascotas.previous_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-double-left"></i></span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                </li>
+            {% endif %}
+
+            {% for i in mascotas.paginator.page_range %}
+                {% if mascotas.number == i %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ i }}</span>
+                    </li>
+                {% elif i > mascotas.number|add:'-3' and i < mascotas.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if mascotas.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ mascotas.next_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ mascotas.paginator.num_pages }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-double-right"></i></span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-emoji-frown" style="font-size: 4rem; color: #6c757d;"></i>
+        <h3 class="mt-3">No se encontraron mascotas</h3>
+        <p class="text-muted">Intenta con otros criterios de búsqueda o <a href="{% url 'mascotas:lista_mascotas' %}">muestra todas las mascotas</a>.</p>
+    </div>
+{% endif %}
+{% endblock %}

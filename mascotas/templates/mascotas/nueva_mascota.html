@@ -1,0 +1,241 @@
+{% extends 'mascotas/base.html' %}
+
+{% block title %}Reportar Mascota Perdida{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0"><i class="bi bi-plus-circle"></i> Reportar Mascota {{ form.estado.value|default:'Perdida'|title }}</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Información Básica</h5>
+                        </div>
+                        
+                        <!-- Nombre -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                {{ form.nombre.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tipo -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.tipo.id_for_label }}" class="form-label">
+                                {{ form.tipo.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tipo }}
+                            {% if form.tipo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Raza -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.raza.id_for_label }}" class="form-label">
+                                {{ form.raza.label }}
+                            </label>
+                            {{ form.raza }}
+                            <div class="form-text">Ej: Labrador, Siames, etc.</div>
+                            {% if form.raza.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.raza.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                {{ form.estado.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.estado.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Fecha de pérdida -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_perdida.id_for_label }}" class="form-label">
+                                {{ form.fecha_perdida.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fecha_perdida }}
+                            {% if form.fecha_perdida.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_perdida.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Lugar de pérdida -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.lugar_perdida.id_for_label }}" class="form-label">
+                                {{ form.lugar_perdida.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.lugar_perdida }}
+                            <div class="form-text">Ej: Calle Principal #123, Comuna, Ciudad</div>
+                            {% if form.lugar_perdida.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.lugar_perdida.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Foto -->
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.foto.id_for_label }}" class="form-label">
+                                {{ form.foto.label }}
+                            </label>
+                            {{ form.foto }}
+                            {% if form.foto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.foto.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Sube una foto clara de la mascota. Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo: 5MB.
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                {{ form.descripcion.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.descripcion }}
+                            <div class="form-text">
+                                Describe características distintivas de la mascota, color del collar, comportamiento, etc.
+                            </div>
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.descripcion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Información de Contacto</h5>
+                            <p class="text-muted">
+                                Esta información será visible para los usuarios que quieran ayudarte a encontrar a tu mascota.
+                            </p>
+                        </div>
+
+                        <!-- Teléfono de contacto -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.telefono_contacto.id_for_label }}" class="form-label">
+                                {{ form.telefono_contacto.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.telefono_contacto }}
+                            {% if form.telefono_contacto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.telefono_contacto.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email de contacto -->
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.email_contacto.id_for_label }}" class="form-label">
+                                {{ form.email_contacto.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.email_contacto }}
+                            {% if form.email_contacto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email_contacto.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'mascotas:lista_mascotas' %}" class="btn btn-outline-secondary me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Mascota
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del formulario
+    (function () {
+        'use strict'
+
+        // Obtener todos los formularios a los que queremos aplicar estilos de validación de Bootstrap
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Bucle sobre ellos y evitar el envío
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+    // Vista previa de la imagen
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('{{ form.foto.id_for_label }}');
+        const imagePreview = document.createElement('div');
+        imagePreview.className = 'mt-2 text-center';
+        fileInput.parentNode.insertBefore(imagePreview, fileInput.nextSibling);
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `
+                        <img src="${e.target.result}" class="img-thumbnail mt-2" style="max-height: 200px;" alt="Vista previa">
+                        <p class="small text-muted mt-1">${file.name} (${(file.size / 1024).toFixed(1)} KB)</p>
+                    `;
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.innerHTML = '';
+            }
+        });
+    });
+</script>
+{% endblock %}
