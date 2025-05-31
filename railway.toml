@@ -1,16 +1,17 @@
 [build]
-  command = "chmod +x entrypoint.sh && python -m pip install --upgrade pip && pip install -r requirements.txt"
+  builder = "DOCKERFILE"
+  dockerfile = "Dockerfile"
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "./entrypoint.sh"
+  startCommand = "/app/entrypoint.sh"
   healthcheckPath = "/"
-  healthcheckTimeout = 120  # Aumentar el tiempo de espera
-  restartDelay = 10
-  restartMax = 5
-  restartTimeout = 300  # 5 minutos
-  restartWindow = 300   # 5 minutos
-  zeroDowntime = false  # Desactivar para evitar problemas durante el despliegue
+  healthcheckTimeout = 300  # 5 minutos
+  restartDelay = 30
+  restartMax = 3
+  restartTimeout = 600  # 10 minutos
+  restartWindow = 1200  # 20 minutos
+  zeroDowntime = false
 
 [build.environment]
   PYTHONUNBUFFERED = "1"
@@ -19,13 +20,10 @@
   NODE_VERSION = "18"
 
 [deploy.environment]
+  # Configuración de Django
   DEBUG = "False"
-  DISABLE_COLLECTSTATIC = "0"  # Habilitar collectstatic
-  PYTHONUNBUFFERED = "1"
-  PYTHONPATH = "/app"
-  PYTHON_VERSION = "3.11.4"
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
-  PORT = "8000"
+  SECRET_KEY = "your-secret-key-here"  # Asegúrate de reemplazarlo con una clave segura
   ALLOWED_HOSTS = "*"
   CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
   
@@ -33,4 +31,8 @@
   DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/railway"
   
   # Configuración de Gunicorn
-  GUNICORN_CMD_ARGS = "--workers=3 --timeout=120 --log-level=debug"
+  GUNICORN_CMD_ARGS = "--workers=3 --timeout=600 --log-level=debug --access-logfile - --error-logfile -"
+  
+  # Configuración de logs
+  PYTHONUNBUFFERED = "1"
+  PYTHONDONTWRITEBYTECODE = "1"
