@@ -17,14 +17,15 @@
   
   # Configuración de healthcheck
   healthcheckPath = "/health/"
-  healthcheckTimeout = 30      # 30 segundos de espera para el healthcheck
-  healthcheckInterval = 15    # 15 segundos entre reintentos
+  healthcheckTimeout = 60           # Aumentado a 60 segundos
+  healthcheckInterval = 30         # Verificar cada 30 segundos
+  healthcheckStartPeriod = 60      # Tiempo de espera inicial antes de comenzar los healthchecks
   
   # Configuración de reinicio
   restartDelay = 10           # 10 segundos de espera entre reinicios
-  restartMax = 3              # Máximo de 3 reintentos
-  restartTimeout = 120        # 2 minutos de tiempo de espera total
-  restartWindow = 300        # Ventana de 5 minutos para reinicios
+  restartMax = 5              # Aumentar el número máximo de reintentos
+  restartTimeout = 300        # Aumentar el tiempo de espera total a 5 minutos
+  restartWindow = 600         # Ventana de 10 minutos para reinicios
   zeroDowntime = true         # Habilitar despliegues sin tiempo de inactividad
 
 # Variables de entorno para la construcción

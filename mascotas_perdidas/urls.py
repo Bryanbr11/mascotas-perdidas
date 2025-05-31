@@ -22,17 +22,24 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
-from django.http import HttpResponse, JsonResponse
-from django.db import connection
+from django.http import HttpResponse, JsonResponse, HttpResponseServerError
+from django.db import connection, DatabaseError
+from django.utils import timezone
 from mascotas.views import registro, inicio_social_auth, error_social_auth, chatbot
 
+@require_GET
 def health_check(request):
     """
     Endpoint de verificación de salud simple y rápido.
     Devuelve 'OK' si el servidor está funcionando.
     """
-    return HttpResponse('OK', status=200, content_type='text/plain')
+    try:
+        # Verificación básica de que la aplicación puede responder
+        return HttpResponse('OK', status=200, content_type='text/plain')
+    except Exception as e:
+        return HttpResponseServerError(f'Error: {str(e)}', content_type='text/plain')
 
+@require_GET
 def health_check_detailed(request):
     """
     Endpoint de verificación de salud detallado.
@@ -57,9 +64,15 @@ def health_check_detailed(request):
             'migrations': 'up to date',
             'debug': settings.DEBUG,
         })
+    except DatabaseError as e:
+        return JsonResponse({
+            'status': 'database_error',
+            'error': f'Database error: {str(e)}',
+            'timestamp': timezone.now().isoformat(),
+        }, status=500)
     except Exception as e:
         return JsonResponse({
-            'status': 'unhealthy',
+            'status': 'error',
             'error': str(e),
             'timestamp': timezone.now().isoformat(),
         }, status=500)
