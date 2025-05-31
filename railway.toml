@@ -1,10 +1,10 @@
 [build]
   builder = "NIXPACKS"
-  buildCommand = "chmod +x start-server.sh && python -m pip install --upgrade pip && pip install -r requirements.txt"
+  buildCommand = "python -m pip install --upgrade pip && pip install -r requirements.txt"
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "./start-server.sh"
+  startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:$PORT"
   healthcheckPath = "/"
   healthcheckTimeout = 60
   restartDelay = 10
