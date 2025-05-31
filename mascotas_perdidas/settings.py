@@ -20,7 +20,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-8n_hf@#jc430nsy5j2fl!xva30
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Configuración de hosts permitidos
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '.railway.app']
+
+# Orígenes confiables para CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 # Forzar DEBUG en True para desarrollo local
 DEBUG = True
