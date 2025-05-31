@@ -2,12 +2,16 @@ asgiref==3.8.1
 certifi==2025.4.26
 charset-normalizer==3.4.2
 crispy-bootstrap5==2023.10
-Django==5.0.1
+Django==4.2.10
 django-crispy-forms==2.1
 django-sslserver==0.22
 gunicorn==21.2.0
 Pillow==10.0.0
 python-dotenv==1.0.0
+# Utilidades
+django-cors-headers==4.3.1
+# Para manejo de archivos estáticos
+brotlipy==0.7.0
 requests==2.32.3
 social-auth-app-django==5.2.0
 social-auth-core==4.4.2

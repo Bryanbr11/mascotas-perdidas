@@ -38,12 +38,30 @@ if [ -z "$PORT" ]; then
     export PORT=8000
 fi
 
-# Iniciar Gunicorn
+# Crear un archivo de salud temporal para verificar que el servidor está funcionando
+echo "from django.http import HttpResponse\nfrom django.views.decorators.http import require_GET\n\n@require_GET\ndef health_check(request):\n    return HttpResponse('OK', status=200)" > /tmp/healthcheck.py
+
+# Iniciar Gunicorn en segundo plano
 echo "=== INICIANDO SERVIDOR EN EL PUERTO $PORT ==="
-exec gunicorn mascotas_perdidas.wsgi:application \
+gunicorn mascotas_perdidas.wsgi:application \
     --bind 0.0.0.0:$PORT \
     --workers 1 \
     --timeout 120 \
     --log-level debug \
     --access-logfile - \
-    --error-logfile -
+    --error-logfile - \
+    --daemon
+
+# Esperar a que Gunicorn esté listo
+sleep 5
+
+# Verificar que el servidor está funcionando
+if ! curl -s http://localhost:$PORT/health/ > /dev/null; then
+    echo "ERROR: No se pudo conectar al servidor"
+    exit 1
+fi
+
+echo "=== SERVIDOR INICIADO CORRECTAMENTE ==="
+
+# Mantener el contenedor en ejecución
+tail -f /dev/null

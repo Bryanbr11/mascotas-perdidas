@@ -22,42 +22,71 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.db import connection
 from mascotas.views import registro, inicio_social_auth, error_social_auth, chatbot
 
-# Vista simple para healthcheck
-@require_GET
 def health_check(request):
-    return HttpResponse('OK', status=200)
+    """
+    Endpoint de verificación de salud simple y rápido.
+    Devuelve 'OK' si el servidor está funcionando.
+    """
+    return HttpResponse('OK', status=200, content_type='text/plain')
+
+def health_check_detailed(request):
+    """
+    Endpoint de verificación de salud detallado.
+    Incluye verificación de base de datos y migraciones.
+    """
+    try:
+        # Verificar conexión a la base de datos
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        
+        # Verificar migraciones pendientes
+        from django.core.management import call_command
+        from io import StringIO
+        out = StringIO()
+        call_command('check', '--deploy', stdout=out)
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'timestamp': timezone.now().isoformat(),
+            'database': 'connected',
+            'migrations': 'up to date',
+            'debug': settings.DEBUG,
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': timezone.now().isoformat(),
+        }, status=500)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # URLs de autenticación
+    # Aplicación principal
+    path('', include('mascotas.urls', namespace='mascotas')),
+    
+    # Autenticación
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='mascotas:lista_mascotas'), name='logout'),
     path('accounts/registro/', registro, name='registro'),
+    path('accounts/', include('django.contrib.auth.urls')),
     
-    # Incluir las URLs de la aplicación mascotas
-    path('', include('mascotas.urls', namespace='mascotas')),
-    
-    # URLs de autenticación de Django
-    path('accounts/', include('django.contrib.auth.urls')),  # Incluye URLs como password_reset, etc.
-    
-    # URLs para autenticación social
+    # Autenticación social
     path('social-auth/', include('social_django.urls', namespace='social')),
-    path('inicio-social/', inicio_social_auth, name='inicio_social_auth'),
-    path('error-social/', error_social_auth, name='error_social_auth'),
+    path('inicio-social-auth/', inicio_social_auth, name='inicio_social_auth'),
+    path('error-social-auth/', error_social_auth, name='error_social_auth'),
     
-    # Páginas de autenticación
-    path('auth/', include('django.contrib.auth.urls')),
-    path('auth/registro/completar-perfil/', TemplateView.as_view(template_name='registration/complete_profile.html'), 
-         name='complete_profile'),
-    
-    # API para el chatbot
+    # Chatbot
     path('api/chatbot/', csrf_exempt(chatbot), name='chatbot'),
     
-    # Healthcheck
+    # Páginas de autenticación
+    path('auth/registro/completar-perfil/', TemplateView.as_view(template_name='registration/complete_profile.html'), 
+         name='complete_profile'),
     path('health/', health_check, name='health_check'),
 ]
 

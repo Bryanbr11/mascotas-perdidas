@@ -6,11 +6,11 @@
 [deploy]
   startCommand = "chmod +x entrypoint.sh && ./entrypoint.sh"
   healthcheckPath = "/health/"
-  healthcheckTimeout = 5  # 5 segundos de espera para el healthcheck
-  healthcheckInterval = 5  # Intervalo entre reintentos
-  restartDelay = 3  # 3 segundos de espera entre reinicios
-  restartMax = 5
-  restartTimeout = 60
+  healthcheckTimeout = 10  # 10 segundos de espera para el healthcheck
+  healthcheckInterval = 10  # Intervalo entre reintentos
+  restartDelay = 5  # 5 segundos de espera entre reinicios
+  restartMax = 3
+  restartTimeout = 120
   restartWindow = 300
   zeroDowntime = false
 
@@ -24,12 +24,13 @@
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
   SECRET_KEY = "your-secret-key-here"
   ALLOWED_HOSTS = "*"
+  CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
   
   # Puerto
   PORT = "8000"
   
   # Configuración de Gunicorn
-  GUNICORN_CMD_ARGS = "--workers=1 --timeout=120 --access-logfile - --error-logfile -"
+  GUNICORN_CMD_ARGS = "--workers=1 --timeout=120 --access-logfile - --error-logfile - --log-level=debug"
   
   # Configuración de WhiteNoise
   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -38,3 +39,8 @@
   PYTHONUNBUFFERED = "1"
   PYTHONHASHSEED = "random"
   PYTHONDONTWRITEBYTECODE = "1"
+  
+  # Deshabilitar SSL para desarrollo
+  SECURE_SSL_REDIRECT = "False"
+  SESSION_COOKIE_SECURE = "False"
+  CSRF_COOKIE_SECURE = "False"

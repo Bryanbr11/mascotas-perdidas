@@ -47,19 +47,19 @@ DEBUG = True
 
 # Application definition
 INSTALLED_APPS = [
-    'sslserver',  # Servidor SSL para desarrollo
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.sites',
     'django.contrib.staticfiles',
-    'mascotas.apps.MascotasConfig',
-    'whitenoise.runserver_nostatic',
-    'social_django',  # Para autenticación social
-    'crispy_forms',   # Para formularios con mejor estilo
-    'crispy_bootstrap5',  # Plantillas para crispy forms
+    'mascotas',
+    'social_django',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'sslserver',
+    'corsheaders',
+    'whitenoise.runserver_nostatic',  # Para desarrollo local
 ]
 
 # Configuración de crispy forms
@@ -77,12 +77,22 @@ AUTHENTICATION_BACKENDS = (
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Configuración de CORS
+CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo, en producción especifica los orígenes permitidos
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://*.railway.app",
 ]
 
 ROOT_URLCONF = 'mascotas_perdidas.urls'
@@ -118,7 +128,7 @@ DATABASES = {
 }
 
 print(f"Usando base de datos SQLite en: {DATABASES['default']['NAME']}")
-        
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -144,7 +154,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Directorio para archivos estáticos en desarrollo
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Media files
 MEDIA_URL = '/media/'
@@ -153,9 +169,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Crear directorios si no existen
 os.makedirs(MEDIA_ROOT, exist_ok=True)
 os.makedirs(STATIC_ROOT, exist_ok=True)
-
-# Configuración de archivos estáticos para WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
