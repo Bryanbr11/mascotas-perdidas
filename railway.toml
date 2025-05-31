@@ -1,88 +1,29 @@
-# Configuración de Railway para Mascotas Perdidas
-# Versión: 1.0.0
-
 [build]
-  # Usar Nixpacks para la construcción
   builder = "NIXPACKS"
-  
-  # Comandos para la construcción
-  buildCommand = "python -m pip install --upgrade pip && pip install -r requirements.txt"
-  
-  # Directorio de salida para archivos estáticos
+  buildCommand = "pip install -r requirements.txt"
   publish = "staticfiles"
 
 [deploy]
-  # Comando de inicio optimizado
   startCommand = "chmod +x entrypoint.sh && ./entrypoint.sh"
-  
-  # Configuración de healthcheck
   healthcheckPath = "/health/"
-  healthcheckTimeout = 60           # Aumentado a 60 segundos
-  healthcheckInterval = 30         # Verificar cada 30 segundos
-  healthcheckStartPeriod = 60      # Tiempo de espera inicial antes de comenzar los healthchecks
-  
-  # Configuración de reinicio
-  restartDelay = 10           # 10 segundos de espera entre reinicios
-  restartMax = 5              # Aumentar el número máximo de reintentos
-  restartTimeout = 300        # Aumentar el tiempo de espera total a 5 minutos
-  restartWindow = 600         # Ventana de 10 minutos para reinicios
-  zeroDowntime = true         # Habilitar despliegues sin tiempo de inactividad
+  healthcheckTimeout = 30
+  healthcheckInterval = 15
+  healthcheckStartPeriod = 30
+  restartDelay = 5
+  restartMax = 3
+  restartTimeout = 180
+  zeroDowntime = true
 
-# Variables de entorno para la construcción
 [build.environment]
-  PYTHON_VERSION = "3.11.4"    # Versión específica de Python
-  NODE_VERSION = "18"          # Versión de Node.js para procesamiento de assets
+  PYTHON_VERSION = "3.11.4"
 
-# Variables de entorno para el despliegue
 [deploy.environment]
-  # Configuración básica de Django
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
   PYTHONUNBUFFERED = "1"
-  
-  # Seguridad
   DEBUG = "False"
-  SECRET_KEY = "${SECRET_KEY}"  # Usar variable de entorno
+  SECRET_KEY = "${SECRET_KEY}"
   ALLOWED_HOSTS = "*"
   CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
-  
-  # Configuración de Gunicorn
   PORT = "8000"
-  
-  # Configuración de WhiteNoise para archivos estáticos
   STATIC_URL = "/static/"
   STATIC_ROOT = "/app/staticfiles"
-  
-  # Configuración de seguridad
-  SECURE_SSL_REDIRECT = "True"
-  SESSION_COOKIE_SECURE = "True"
-  CSRF_COOKIE_SECURE = "True"
-  
-  # Configuración de logs
-  LOG_LEVEL = "INFO"
-  
-  # Configuración de caché
-  CACHES = "{'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}"
-
-# Configuración de escalado automático
-[deploy.autoScaling]
-  min = 1
-  max = 2
-  concurrency = 100
-  targetCpuUtilization = 70
-  targetMemoryUtilization = 70
-
-# Configuración de red
-[deploy.ingress]
-  cors = true
-  rateLimit = {
-    enabled = true,
-    requests = 1000,
-    window = "1m"
-  }
-
-# Configuración de monitoreo
-[deploy.monitoring]
-  enabled = true
-  path = "/health/detailed"
-  interval = "30s"
-  timeout = "10s"

@@ -100,7 +100,10 @@ urlpatterns = [
     # Páginas de autenticación
     path('auth/registro/completar-perfil/', TemplateView.as_view(template_name='registration/complete_profile.html'), 
          name='complete_profile'),
+    
+    # Health checks
     path('health/', health_check, name='health_check'),
+    path('health/detailed/', health_check_detailed, name='health_check_detailed'),
 ]
 
 # Servir archivos estáticos y multimedia en desarrollo
