@@ -6,11 +6,7 @@
   builder = "NIXPACKS"
   
   # Comandos para la construcción
-  buildCommand = """
-    python -m pip install --upgrade pip && 
-    pip install -r requirements.txt &&
-    python manage.py collectstatic --noinput --clear
-  """
+  buildCommand = "python -m pip install --upgrade pip && pip install -r requirements.txt"
   
   # Directorio de salida para archivos estáticos
   publish = "staticfiles"
@@ -27,29 +23,20 @@
   # Configuración de reinicio
   restartDelay = 10           # 10 segundos de espera entre reinicios
   restartMax = 3              # Máximo de 3 reintentos
-  restartTimeout = 300        # 5 minutos de tiempo de espera total
-  restartWindow = 3600        # Ventana de 1 hora para reinicios
+  restartTimeout = 120        # 2 minutos de tiempo de espera total
+  restartWindow = 300        # Ventana de 5 minutos para reinicios
   zeroDowntime = true         # Habilitar despliegues sin tiempo de inactividad
 
 # Variables de entorno para la construcción
 [build.environment]
   PYTHON_VERSION = "3.11.4"    # Versión específica de Python
-  NODE_VERSION = "20"          # Versión de Node.js para procesamiento de assets
-  PIP_CACHE_DIR = "/tmp/pip-cache"
-  NPM_CONFIG_CACHE = "/tmp/npm-cache"
-  
-  # Optimización de pip
-  PIP_NO_CACHE_DIR = "false"
-  PIP_DISABLE_PIP_VERSION_CHECK = "true"
-  PIP_DEFAULT_TIMEOUT = "100"
+  NODE_VERSION = "18"          # Versión de Node.js para procesamiento de assets
 
 # Variables de entorno para el despliegue
 [deploy.environment]
   # Configuración básica de Django
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
   PYTHONUNBUFFERED = "1"
-  PYTHONHASHSEED = "random"
-  PYTHONDONTWRITEBYTECODE = "1"
   
   # Seguridad
   DEBUG = "False"
@@ -59,43 +46,21 @@
   
   # Configuración de Gunicorn
   PORT = "8000"
-  WEB_CONCURRENCY = "2"  # Ajustar según los recursos disponibles
-  GUNICORN_CMD_ARGS = """
-    --workers $(( 2 * $(nproc --all) + 1 )) \
-    --threads 2 \
-    --timeout 120 \
-    --keep-alive 5 \
-    --worker-class=gthread \
-    --log-level=info \
-    --access-logfile - \
-    --error-logfile - \
-    --capture-output \
-    --enable-stdio-inheritance
-  """
-  
-  # Configuración de la base de datos
-  DATABASE_URL = "${DATABASE_URL}"  # Usar variable de entorno
   
   # Configuración de WhiteNoise para archivos estáticos
   STATIC_URL = "/static/"
   STATIC_ROOT = "/app/staticfiles"
-  WHITENOISE_MAX_AGE = 31536000  # 1 año de caché
   
-  # Configuración de seguridad (habilitar en producción)
-  SECURE_HSTS_SECONDS = "31536000"  # 1 año
-  SECURE_HSTS_INCLUDE_SUBDOMAINS = "True"
-  SECURE_HSTS_PRELOAD = "True"
+  # Configuración de seguridad
   SECURE_SSL_REDIRECT = "True"
   SESSION_COOKIE_SECURE = "True"
   CSRF_COOKIE_SECURE = "True"
-  SECURE_PROXY_SSL_HEADER = "('HTTP_X_FORWARDED_PROTO', 'https')"
   
   # Configuración de logs
   LOG_LEVEL = "INFO"
-  DJANGO_LOG_LEVEL = "INFO"
   
-  # Configuración de caché (usando archivos locales para SQLite)
-  CACHES = "{'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}"
+  # Configuración de caché
+  CACHES = "{'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}"
 
 # Configuración de escalado automático
 [deploy.autoScaling]
