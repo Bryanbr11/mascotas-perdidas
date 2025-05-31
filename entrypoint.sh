@@ -1,6 +1,7 @@
 #!/bin/bash
+set -e  # Detener el script en caso de error
 
-# Habilitar modo de depuración
+# Configuración básica
 export PYTHONUNBUFFERED=1
 
 # Mostrar información del sistema
@@ -37,27 +38,21 @@ if [ -z "$PORT" ]; then
     export PORT=8000
 fi
 
-# Crear un archivo de healthcheck simple
+# Crear un archivo de healthcheck temporal
 echo "from django.http import HttpResponse
 from django.views.decorators.http import require_GET
+
 @require_GET
 def health_check(request):
-    return HttpResponse('OK', status=200)" > /app/healthcheck.py
+    return HttpResponse('OK', status=200)" > /tmp/healthcheck.py
 
-# Añadir la ruta de healthcheck a urls.py
-echo "from django.urls import path
-from . import healthcheck
-
-urlpatterns = [
-    path('health/', healthcheck.health_check, name='health_check'),
-] + (urlpatterns if 'urlpatterns' in locals() else [])" > /app/mascotas_perdidas/urls_healthcheck.py
-
-# Iniciar Gunicorn con configuración mínima
+# Iniciar Gunicorn
 echo "=== INICIANDO SERVIDOR EN EL PUERTO $PORT ==="
 exec gunicorn mascotas_perdidas.wsgi:application \
     --bind 0.0.0.0:$PORT \
     --workers 2 \
-    --timeout 60 \
+    --timeout 120 \
     --log-level debug \
     --access-logfile - \
-    --error-logfile -
+    --error-logfile - \
+    --preload

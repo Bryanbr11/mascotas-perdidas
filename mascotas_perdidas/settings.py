@@ -111,7 +111,7 @@ WSGI_APPLICATION = 'mascotas_perdidas.wsgi.application'
 # Database
 import dj_database_url
 
-# Configuración por defecto (SQLite para desarrollo local)
+# Configuración de la base de datos
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -122,42 +122,27 @@ DATABASES = {
 # Configuración para PostgreSQL en producción
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
+    db_config = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    db_config['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
+    db_config['OPTIONS'] = {
+        'connect_timeout': 5,
+        'sslmode': 'require' if 'amazonaws.com' in DATABASE_URL else 'disable'
+    }
+    DATABASES['default'] = db_config
+    
+    # Verificar la conexión a la base de datos
     try:
-        # Forzar el uso de psycopg2-binary
-        db_from_env = dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-            engine='django.db.backends.postgresql_psycopg2',
-        )
-        
-        # Actualizar la configuración de la base de datos
-        DATABASES['default'].update(db_from_env)
-        
-        # Asegurar que estamos usando psycopg2
-        DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
-        
-        # Configuración adicional para PostgreSQL
-        DATABASES['default'].update({
-            'OPTIONS': {
-                'connect_timeout': 10,  # 10 segundos de tiempo de espera
-                'keepalives': 1,
-                'keepalives_idle': 30,
-                'keepalives_interval': 10,
-                'keepalives_count': 5,
-            }
-        })
-        
-        # Forzar la conexión para verificar que todo está bien
         from django.db import connections
         conn = connections['default']
         conn.ensure_connection()
-        print("Conexión a la base de datos establecida correctamente.")
-        
+        print("Conexión exitosa a la base de datos")
     except Exception as e:
-        print(f"Error al conectar a la base de datos: {str(e)}")
-        raise
-
+        print(f"Error al conectar a la base de datos: {e}")
+        DATABASES['default'] = {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+        
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

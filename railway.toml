@@ -6,11 +6,12 @@
 [deploy]
   startCommand = "chmod +x entrypoint.sh && ./entrypoint.sh"
   healthcheckPath = "/health/"
-  healthcheckTimeout = 10  # 10 segundos de espera para el healthcheck
-  restartDelay = 5  # 5 segundos de espera entre reinicios
+  healthcheckTimeout = 5  # 5 segundos de espera para el healthcheck
+  healthcheckInterval = 5  # Intervalo entre reintentos
+  restartDelay = 3  # 3 segundos de espera entre reinicios
   restartMax = 5
-  restartTimeout = 300
-  restartWindow = 600
+  restartTimeout = 60
+  restartWindow = 300
   zeroDowntime = false
 
 [build.environment]
@@ -31,7 +32,12 @@
   PORT = "8000"
   
   # Configuración de Gunicorn
-  GUNICORN_CMD_ARGS = "--workers=2 --timeout=60 --access-logfile - --error-logfile -"
+  GUNICORN_CMD_ARGS = "--workers=2 --timeout=120 --access-logfile - --error-logfile - --preload"
   
   # Configuración de WhiteNoise
   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+  
+  # Configuración adicional
+  PYTHONUNBUFFERED = "1"
+  PYTHONHASHSEED = "random"
+  PYTHONDONTWRITEBYTECODE = "1"
