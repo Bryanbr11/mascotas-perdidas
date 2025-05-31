@@ -4,47 +4,34 @@
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "./entrypoint.sh"
+  startCommand = "chmod +x entrypoint.sh && ./entrypoint.sh"
   healthcheckPath = "/health/"
-  healthcheckTimeout = 30  # 30 segundos de espera para el healthcheck
-  restartDelay = 10  # Reducir el tiempo de espera entre reinicios
+  healthcheckTimeout = 10  # 10 segundos de espera para el healthcheck
+  restartDelay = 5  # 5 segundos de espera entre reinicios
   restartMax = 5
   restartTimeout = 300
   restartWindow = 600
   zeroDowntime = false
 
 [build.environment]
-  PYTHONUNBUFFERED = "1"
-  PYTHONPATH = "/app"
   PYTHON_VERSION = "3.11.4"
   NODE_VERSION = "18"
 
 [deploy.environment]
   # Configuración de Django
-  DEBUG = "True"  # Temporalmente en True para depuración
+  DEBUG = "True"
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
-  SECRET_KEY = "your-secret-key-here"  # Asegúrate de reemplazarlo con una clave segura
+  SECRET_KEY = "your-secret-key-here"
   ALLOWED_HOSTS = "*"
-  CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
   
-  # Configuración de la base de datos
+  # Base de datos
   DATABASE_URL = "${DATABASE_URL}"
-  
-  # Configuración de Python
-  PYTHONPATH = "/app"
-  PYTHONUNBUFFERED = "1"
-  PYTHONDONTWRITEBYTECODE = "1"
   
   # Puerto
   PORT = "8000"
   
   # Configuración de Gunicorn
-  GUNICORN_CMD_ARGS = "--workers=3 --timeout=120 --keep-alive=5 --max-requests=1000 --max-requests-jitter=50 --log-level=debug --access-logfile - --error-logfile -"
+  GUNICORN_CMD_ARGS = "--workers=2 --timeout=60 --access-logfile - --error-logfile -"
   
   # Configuración de WhiteNoise
   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-  
-  # Configuración de seguridad (temporalmente deshabilitada para depuración)
-  SECURE_SSL_REDIRECT = "False"
-  SESSION_COOKIE_SECURE = "False"
-  CSRF_COOKIE_SECURE = "False"
