@@ -4,13 +4,10 @@
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear"
+  startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
   healthcheckPath = "/health/"
   healthcheckTimeout = 30
   healthcheckInterval = 15
-  restartDelay = 5
-  restartMax = 3
-  restartTimeout = 120
 
 [build.environment]
   PYTHON_VERSION = "3.11.4"
@@ -21,7 +18,6 @@
   DEBUG = "False"
   SECRET_KEY = "${SECRET_KEY}"
   ALLOWED_HOSTS = "*"
-  CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
   PORT = "8000"
   STATIC_URL = "/static/"
   STATIC_ROOT = "/app/staticfiles"
