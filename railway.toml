@@ -1,7 +1,6 @@
 [build]
-  builder = "NIXPACKS"
-  buildCommand = "pip install -r requirements.txt"
-  publish = "staticfiles"
+  builder = "DOCKERFILE"
+  dockerfile = "Dockerfile"
 
 [deploy]
   startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
@@ -10,7 +9,7 @@
   healthcheckInterval = 15
 
 [build.environment]
-  PYTHON_VERSION = "3.11.4"
+  PYTHON_VERSION = "3.11"
 
 [deploy.environment]
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
@@ -19,5 +18,3 @@
   SECRET_KEY = "${SECRET_KEY}"
   ALLOWED_HOSTS = "*"
   PORT = "8000"
-  STATIC_URL = "/static/"
-  STATIC_ROOT = "/app/staticfiles"
