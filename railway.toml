@@ -1,0 +1,25 @@
+[build]
+  command = "python manage.py migrate && python manage.py collectstatic --noinput"
+  publish = "staticfiles"
+
+[deploy]
+  startCommand = "gunicorn mascotas_perdidas.wsgi --log-file -"
+  healthcheckPath = "/"
+  healthcheckTimeout = 100
+  restartDelay = 5
+  restartMax = 3
+  restartTimeout = 60
+  restartWindow = 60
+  zeroDowntime = true
+
+[build.environment]
+  PYTHONUNBUFFERED = "1"
+  PYTHONPATH = "/app"
+  PYTHON_VERSION = "3.11.4"
+
+[deploy.environment]
+  DEBUG = "False"
+  DISABLE_COLLECTSTATIC = "1"
+  PYTHONUNBUFFERED = "1"
+  PYTHONPATH = "/app"
+  PYTHON_VERSION = "3.11.4"
