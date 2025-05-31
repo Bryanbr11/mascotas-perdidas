@@ -4,15 +4,13 @@
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "chmod +x entrypoint.sh && ./entrypoint.sh"
+  startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear"
   healthcheckPath = "/health/"
   healthcheckTimeout = 30
   healthcheckInterval = 15
-  healthcheckStartPeriod = 30
   restartDelay = 5
   restartMax = 3
-  restartTimeout = 180
-  zeroDowntime = true
+  restartTimeout = 120
 
 [build.environment]
   PYTHON_VERSION = "3.11.4"
