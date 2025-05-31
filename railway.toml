@@ -1,22 +1,22 @@
 [build]
-  command = "chmod +x entrypoint.sh && python manage.py check --deploy"
+  command = "chmod +x entrypoint.sh && python -m pip install --upgrade pip && pip install -r requirements.txt"
   publish = "staticfiles"
 
 [deploy]
   startCommand = "./entrypoint.sh"
   healthcheckPath = "/"
-  healthcheckTimeout = 60  # Aumentar el tiempo de espera
-  restartDelay = 5
-  restartMax = 3
-  restartTimeout = 120  # Aumentar el tiempo de espera
-  restartWindow = 120   # Aumentar la ventana de reinicio
-  zeroDowntime = true
+  healthcheckTimeout = 120  # Aumentar el tiempo de espera
+  restartDelay = 10
+  restartMax = 5
+  restartTimeout = 300  # 5 minutos
+  restartWindow = 300   # 5 minutos
+  zeroDowntime = false  # Desactivar para evitar problemas durante el despliegue
 
 [build.environment]
   PYTHONUNBUFFERED = "1"
   PYTHONPATH = "/app"
   PYTHON_VERSION = "3.11.4"
-  NODE_VERSION = "16"
+  NODE_VERSION = "18"
 
 [deploy.environment]
   DEBUG = "False"
@@ -28,3 +28,9 @@
   PORT = "8000"
   ALLOWED_HOSTS = "*"
   CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
+  
+  # Configuración de la base de datos
+  DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/railway"
+  
+  # Configuración de Gunicorn
+  GUNICORN_CMD_ARGS = "--workers=3 --timeout=120 --log-level=debug"
