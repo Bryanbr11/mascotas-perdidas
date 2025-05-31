@@ -4,33 +4,41 @@ set -e  # Detener el script en caso de error
 # Configuración básica
 export PYTHONUNBUFFERED=1
 
+# Función para imprimir un encabezado
+print_header() {
+    echo -e "\n\033[1;34m=== $1 ===\033[0m"
+}
+
 # Mostrar información del sistema
-echo "=== INFORMACIÓN DEL SISTEMA ==="
+print_header "INFORMACIÓN DEL SISTEMA"
 uname -a
 python --version
 pip --version
-echo "=============================="
 
 # Mostrar variables de entorno (sin credenciales sensibles)
-echo "=== VARIABLES DE ENTORNO ==="
+print_header "VARIABLES DE ENTORNO"
 printenv | grep -v -i 'pass\|secret\|key\|token\|pwd' | sort
-echo "============================"
 
 # Establecer el directorio de trabajo
 cd /app
 
 # Instalar dependencias
-echo "=== INSTALANDO DEPENDENCIAS ==="
+print_header "INSTALANDO DEPENDENCIAS"
 pip install --upgrade pip
-pip install -r requirements.txt
-echo "=============================="
+pip install --no-cache-dir -r requirements.txt
 
 # Aplicar migraciones
-echo "=== APLICANDO MIGRACIONES ==="
+print_header "APLICANDO MIGRACIONES"
 python manage.py migrate --noinput
 
+# Crear superusuario si no existe
+if [ -z "$(python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(is_superuser=True).count())" 2>/dev/null)" ] || [ "$(python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(is_superuser=True).count())" 2>/dev/null)" = "0" ]; then
+    echo "No se encontró un superusuario. Creando uno..."
+    echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@example.com', 'admin') if not User.objects.filter(username='admin').exists() else None" | python manage.py shell
+fi
+
 # Recolectar archivos estáticos
-echo "=== RECOLECTANDO ARCHIVOS ESTÁTICOS ==="
+print_header "RECOLECTANDO ARCHIVOS ESTÁTICOS"
 python manage.py collectstatic --noinput --clear
 
 # Verificar que el puerto está configurado
@@ -38,30 +46,26 @@ if [ -z "$PORT" ]; then
     export PORT=8000
 fi
 
-# Crear un archivo de salud temporal para verificar que el servidor está funcionando
-echo "from django.http import HttpResponse\nfrom django.views.decorators.http import require_GET\n\n@require_GET\ndef health_check(request):\n    return HttpResponse('OK', status=200)" > /tmp/healthcheck.py
+# Configuración de Gunicorn
+WORKERS=$(( 2 * $(nproc --all) + 1 ))
+THREADS=2
+TIMEOUT=120
+KEEP_ALIVE=5
 
 # Iniciar Gunicorn en segundo plano
-echo "=== INICIANDO SERVIDOR EN EL PUERTO $PORT ==="
-gunicorn mascotas_perdidas.wsgi:application \
+print_header "INICIANDO SERVIDOR EN EL PUERTO $PORT"
+exec gunicorn mascotas_perdidas.wsgi:application \
     --bind 0.0.0.0:$PORT \
-    --workers 1 \
-    --timeout 120 \
-    --log-level debug \
+    --workers $WORKERS \
+    --threads $THREADS \
+    --timeout $TIMEOUT \
+    --keep-alive $KEEP_ALIVE \
+    --worker-class gthread \
+    --log-level info \
     --access-logfile - \
     --error-logfile - \
-    --daemon
+    --capture-output \
+    --enable-stdio-inheritance \
+    --preload
 
-# Esperar a que Gunicorn esté listo
-sleep 5
-
-# Verificar que el servidor está funcionando
-if ! curl -s http://localhost:$PORT/health/ > /dev/null; then
-    echo "ERROR: No se pudo conectar al servidor"
-    exit 1
-fi
-
-echo "=== SERVIDOR INICIADO CORRECTAMENTE ==="
-
-# Mantener el contenedor en ejecución
-tail -f /dev/null
+# Nota: Eliminamos el tail -f /dev/null ya que gunicorn se ejecuta en primer plano
