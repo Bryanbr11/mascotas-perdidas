@@ -1,1 +1,1 @@
-web: bash entrypoint.sh
+web: bash start-server.sh

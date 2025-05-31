@@ -1,16 +1,16 @@
 [build]
-  builder = "DOCKERFILE"
-  dockerfile = "Dockerfile"
+  builder = "NIXPACKS"
+  buildCommand = "chmod +x start-server.sh && python -m pip install --upgrade pip && pip install -r requirements.txt"
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "/app/entrypoint.sh"
+  startCommand = "./start-server.sh"
   healthcheckPath = "/"
-  healthcheckTimeout = 300  # 5 minutos
-  restartDelay = 30
-  restartMax = 3
-  restartTimeout = 600  # 10 minutos
-  restartWindow = 1200  # 20 minutos
+  healthcheckTimeout = 60
+  restartDelay = 10
+  restartMax = 5
+  restartTimeout = 300
+  restartWindow = 600
   zeroDowntime = false
 
 [build.environment]
@@ -30,9 +30,9 @@
   # Configuración de la base de datos
   DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/railway"
   
-  # Configuración de Gunicorn
-  GUNICORN_CMD_ARGS = "--workers=3 --timeout=600 --log-level=debug --access-logfile - --error-logfile -"
-  
   # Configuración de logs
   PYTHONUNBUFFERED = "1"
   PYTHONDONTWRITEBYTECODE = "1"
+  
+  # Puerto
+  PORT = "8000"
