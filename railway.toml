@@ -28,31 +28,21 @@
   CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
   
   # Configuración de la base de datos
-  # La URL de la base de datos será proporcionada automáticamente por Railway
-  
-  # Configuración de logs
-  PYTHONUNBUFFERED = "1"
-  PYTHONDONTWRITEBYTECODE = "1"
-  
-  # Puerto
-  PORT = "8000"
-  
-  # Configuración de WhiteNoise
-  STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-  
-  # Configuración de la base de datos
   DATABASE_URL = "${DATABASE_URL}"
-  
-  # Configuración de Gunicorn
-  GUNICORN_CMD_ARGS = "--workers=2 --timeout=300 --bind=0.0.0.0:$PORT --access-logfile - --error-logfile -"
   
   # Configuración de Python
   PYTHONPATH = "/app"
   PYTHONUNBUFFERED = "1"
   PYTHONDONTWRITEBYTECODE = "1"
   
-  # Configuración de la aplicación
-  DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
+  # Puerto
+  PORT = "8000"
+  
+  # Configuración de Gunicorn
+  GUNICORN_CMD_ARGS = "--workers=2 --timeout=300 --bind=0.0.0.0:$PORT --access-logfile - --error-logfile -"
+  
+  # Configuración de WhiteNoise
+  STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
   
   # Configuración de seguridad (temporalmente deshabilitada para depuración)
   SECURE_SSL_REDIRECT = "False"
