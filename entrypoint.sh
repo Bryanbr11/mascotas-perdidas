@@ -19,6 +19,9 @@ echo "============================"
 # Establecer el directorio de trabajo
 cd /app
 
+# Crear directorio para la base de datos SQLite
+mkdir -p /app/db
+
 # Instalar dependencias
 echo "=== INSTALANDO DEPENDENCIAS ==="
 pip install --upgrade pip
@@ -38,21 +41,12 @@ if [ -z "$PORT" ]; then
     export PORT=8000
 fi
 
-# Crear un archivo de healthcheck temporal
-echo "from django.http import HttpResponse
-from django.views.decorators.http import require_GET
-
-@require_GET
-def health_check(request):
-    return HttpResponse('OK', status=200)" > /tmp/healthcheck.py
-
 # Iniciar Gunicorn
 echo "=== INICIANDO SERVIDOR EN EL PUERTO $PORT ==="
 exec gunicorn mascotas_perdidas.wsgi:application \
     --bind 0.0.0.0:$PORT \
-    --workers 2 \
+    --workers 1 \
     --timeout 120 \
     --log-level debug \
     --access-logfile - \
-    --error-logfile - \
-    --preload
+    --error-logfile -

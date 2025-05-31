@@ -109,9 +109,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mascotas_perdidas.wsgi.application'
 
 # Database
-import dj_database_url
-
-# Configuración de la base de datos
+# Usando SQLite por simplicidad
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -119,29 +117,9 @@ DATABASES = {
     }
 }
 
-# Configuración para PostgreSQL en producción
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
-    db_config = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-    db_config['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
-    db_config['OPTIONS'] = {
-        'connect_timeout': 5,
-        'sslmode': 'require' if 'amazonaws.com' in DATABASE_URL else 'disable'
-    }
-    DATABASES['default'] = db_config
-    
-    # Verificar la conexión a la base de datos
-    try:
-        from django.db import connections
-        conn = connections['default']
-        conn.ensure_connection()
-        print("Conexión exitosa a la base de datos")
-    except Exception as e:
-        print(f"Error al conectar a la base de datos: {e}")
-        DATABASES['default'] = {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+# Crear el directorio de la base de datos si no existe
+os.makedirs(os.path.dirname(DATABASES['default']['NAME']), exist_ok=True)
+print(f"Usando base de datos SQLite en: {DATABASES['default']['NAME']}")
         
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
