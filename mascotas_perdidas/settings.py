@@ -113,12 +113,10 @@ WSGI_APPLICATION = 'mascotas_perdidas.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),  # Ruta absoluta al archivo SQLite
     }
 }
 
-# Crear el directorio de la base de datos si no existe
-os.makedirs(os.path.dirname(DATABASES['default']['NAME']), exist_ok=True)
 print(f"Usando base de datos SQLite en: {DATABASES['default']['NAME']}")
         
 # Password validation

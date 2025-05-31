@@ -19,9 +19,6 @@ echo "============================"
 # Establecer el directorio de trabajo
 cd /app
 
-# Crear directorio para la base de datos SQLite
-mkdir -p /app/db
-
 # Instalar dependencias
 echo "=== INSTALANDO DEPENDENCIAS ==="
 pip install --upgrade pip
