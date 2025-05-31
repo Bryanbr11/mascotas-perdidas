@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - Mascotas Perdidas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">Iniciar Sesión</h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong>¡Error!</strong> Por favor, introduce un nombre de usuario y contraseña correctos.
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <input type="hidden" name="next" value="{{ next }}">
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Nombre de usuario o correo electrónico</label>
+                            <input type="text" name="username" class="form-control" id="id_username" required>
+                            <div class="invalid-feedback">
+                                Por favor, ingresa tu nombre de usuario o correo electrónico.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" name="password" class="form-control" id="id_password" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                Por favor, ingresa tu contraseña.
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember_me" id="remember_me">
+                                <label class="form-check-label" for="remember_me">
+                                    Recordarme
+                                </label>
+                            </div>
+                            <a href="{% url 'password_reset' %}" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <p class="text-center mb-0">
+                        ¿No tienes una cuenta? 
+                        <a href="{% url 'registro' %}" class="fw-bold text-decoration-none">Regístrate aquí</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .toggle-password {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    .toggle-password:focus {
+        box-shadow: none;
+    }
+</style>
+
+<script>
+    // Validación de formulario
+    (function () {
+        'use strict'
+        
+        // Obtener todos los formularios que necesitan validación
+        var forms = document.querySelectorAll('.needs-validation')
+        
+        // Activar la validación en cada campo
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                
+                form.classList.add('was-validated')
+            }, false)
+        })
+        
+        // Alternar visibilidad de contraseña
+        document.querySelectorAll('.toggle-password').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+    })()
+</script>
+{% endblock %}

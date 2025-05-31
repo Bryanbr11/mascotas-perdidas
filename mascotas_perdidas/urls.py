@@ -25,15 +25,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # URLs de autenticación
-    path('iniciar-sesion/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('cerrar-sesion/', auth_views.LogoutView.as_view(next_page='mascotas:lista_mascotas'), name='logout'),
-    path('registro/', registro, name='signup'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='mascotas:lista_mascotas'), name='logout'),
+    path('accounts/registro/', registro, name='registro'),
     
-    # URLs de autenticación de Django (para restablecimiento de contraseña, etc.)
-    path('cuenta/', include('django.contrib.auth.urls')),
+    # Incluir las URLs de la aplicación mascotas
+    path('', include('mascotas.urls', namespace='mascotas')),
     
-    # Nuestras URLs
-    path('', include('mascotas.urls')),
+    # URLs de autenticación de Django
+    path('accounts/', include('django.contrib.auth.urls')),  # Incluye URLs como password_reset, etc.
 ]
 
 # Servir archivos estáticos y multimedia en desarrollo

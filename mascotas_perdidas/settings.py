@@ -1,3 +1,4 @@
+
 """
 Django settings for mascotas_perdidas project.
 """
@@ -19,15 +20,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-8n_hf@#jc430nsy5j2fl!xva30
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Configuración de hosts permitidos
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
 
-# Configuración de Railway
-RAILWAY_ENV = os.getenv('RAILWAY_ENV', '') == 'True'
-if RAILWAY_ENV:
-    ALLOWED_HOSTS = ['.railway.app', 'localhost', '127.0.0.1']
+# Forzar DEBUG en True para desarrollo local
+DEBUG = True
 
 # Application definition
 INSTALLED_APPS = [
+    'sslserver',  # Servidor SSL para desarrollo
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,10 +51,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mascotas_perdidas.urls'
 
+# Configuración de plantillas
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,25 +71,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mascotas_perdidas.wsgi.application'
 
 # Database
-import dj_database_url
-
-DATABASE_URL = os.getenv('DATABASE_URL')
-
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -115,7 +103,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] if not RAILWAY_ENV else []  # Solo en desarrollo
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Directorio para archivos estáticos en desarrollo
 
 # Media files
 MEDIA_URL = '/media/'
