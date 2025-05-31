@@ -4,10 +4,10 @@
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:$PORT"
+  startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --workers 2 --bind 0.0.0.0:$PORT --timeout 300 --access-logfile - --error-logfile - mascotas_perdidas.wsgi:application"
   healthcheckPath = "/"
-  healthcheckTimeout = 300  # Aumentar el tiempo de espera del healthcheck
-  restartDelay = 30
+  healthcheckTimeout = 300  # 5 minutos de espera para el healthcheck
+  restartDelay = 60  # Aumentar el tiempo de espera entre reinicios
   restartMax = 5
   restartTimeout = 300
   restartWindow = 600
@@ -39,3 +39,22 @@
   
   # Configuración de WhiteNoise
   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+  
+  # Configuración de la base de datos
+  DATABASE_URL = "${DATABASE_URL}"
+  
+  # Configuración de Gunicorn
+  GUNICORN_CMD_ARGS = "--workers=2 --timeout=300 --bind=0.0.0.0:$PORT --access-logfile - --error-logfile -"
+  
+  # Configuración de Python
+  PYTHONPATH = "/app"
+  PYTHONUNBUFFERED = "1"
+  PYTHONDONTWRITEBYTECODE = "1"
+  
+  # Configuración de la aplicación
+  DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
+  
+  # Configuración de seguridad (temporalmente deshabilitada para depuración)
+  SECURE_SSL_REDIRECT = "False"
+  SESSION_COOKIE_SECURE = "False"
+  CSRF_COOKIE_SECURE = "False"

@@ -111,7 +111,7 @@ WSGI_APPLICATION = 'mascotas_perdidas.wsgi.application'
 # Database
 import dj_database_url
 
-# Configuración de la base de datos
+# Configuración por defecto (SQLite para desarrollo local)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -120,13 +120,30 @@ DATABASES = {
 }
 
 # Configuración para PostgreSQL en producción
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES['default'] = dj_database_url.config(
+    # Forzar el uso de psycopg2-binary
+    db_from_env = dj_database_url.config(
         default=DATABASE_URL,
         conn_max_age=600,
         conn_health_checks=True,
+        engine='django.db.backends.postgresql_psycopg2',
     )
+    DATABASES['default'].update(db_from_env)
+    
+    # Asegurar que estamos usando psycopg2
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
+    
+    # Configuración adicional para PostgreSQL
+    DATABASES['default'].update({
+        'OPTIONS': {
+            'connect_timeout': 30,  # 30 segundos de tiempo de espera
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5,
+        }
+    })
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

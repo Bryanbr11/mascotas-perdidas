@@ -1,1 +1,1 @@
-web: gunicorn --workers 2 --bind 0.0.0.0:$PORT --timeout 300 --access-logfile - --error-logfile - mascotas_perdidas.wsgi:application
+web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --workers 2 --bind 0.0.0.0:$PORT --timeout 300 --access-logfile - --error-logfile - mascotas_perdidas.wsgi:application
