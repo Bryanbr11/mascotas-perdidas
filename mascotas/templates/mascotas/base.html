@@ -6,6 +6,7 @@
     <title>{% block title %}Mascotas Perdidas{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             padding-top: 56px;
@@ -96,7 +97,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-outline-light ms-2" href="{% url 'signup' %}?next={{ request.path }}">
+                            <a class="btn btn-outline-light ms-2" href="{% url 'registro' %}?next={{ request.path }}">
                                 <i class="bi bi-person-plus me-1"></i> Registrarse
                             </a>
                         </li>
@@ -139,5 +140,165 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+    
+    <!-- Chatbot -->
+    <button id="chatbot-button" style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #4e73df; color: white; border: 2px solid white; font-size: 24px; cursor: pointer; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.5);">
+        <i class="fas fa-robot"></i>
+    </button>
+    
+    <div id="chat-window" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 300px; height: 400px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 9999; flex-direction: column;">
+        <div style="background: #4e73df; color: white; padding: 15px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <h5 style="margin: 0;">Asistente Virtual</h5>
+            <button id="close-chat" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">×</button>
+        </div>
+        <div id="chat-messages" style="flex: 1; padding: 15px; overflow-y: auto;">
+            <div style="background: #f1f1f1; padding: 10px; border-radius: 5px; margin-bottom: 10px; max-width: 80%;">
+                ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?
+            </div>
+        </div>
+        <div style="padding: 10px; border-top: 1px solid #eee; display: flex;">
+            <input type="text" id="user-input" placeholder="Escribe tu mensaje..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 5px;">
+            <button id="send-button" style="padding: 8px 15px; background: #4e73df; color: white; border: none; border-radius: 4px; cursor: pointer;">Enviar</button>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Script de chatbot cargado');
+        
+        const chatButton = document.getElementById('chatbot-button');
+        const chatWindow = document.getElementById('chat-window');
+        const closeButton = document.getElementById('close-chat');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        
+        // Mostrar/ocultar ventana de chat
+        chatButton.addEventListener('click', function() {
+            chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+        });
+        
+        // Cerrar ventana de chat
+        closeButton.addEventListener('click', function() {
+            chatWindow.style.display = 'none';
+        });
+        
+        // Enviar mensaje al presionar Enter
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Enviar mensaje al hacer clic en el botón
+        sendButton.addEventListener('click', sendMessage);
+        
+        // Función para obtener una respuesta inteligente
+        function getBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Respuestas basadas en palabras clave
+            if (/(hola|buenos|buenas|saludos|holi|hi|hello)/i.test(lowerMessage)) {
+                return '¡Hola! Soy tu asistente de Mascotas Perdidas. ¿En qué puedo ayudarte hoy?';
+            }
+            
+            if (/(perdí|perdido|perdida|extravi[oó]|se me perdi[óo]|no encuentro)/i.test(lowerMessage)) {
+                return 'Entiendo que has perdido a tu mascota. Te recomiendo:\n1. Publicar en nuestra sección de mascotas perdidas\n2. Revisar el refugio local\n3. Poner carteles en tu vecindario\n¿Neitas ayuda para publicar el aviso?';
+            }
+            
+            if (/(encontr[ée]|hall[ée]|vi una|hay una|avist[ée])/i.test(lowerMessage)) {
+                return '¡Gracias por reportar! Para reportar una mascota encontrada:\n1. Toma una foto clara\n2. Proporciona la ubicación y fecha\n3. Describe sus características\n¿Te gustaría llenar el formulario de reporte ahora?';
+            }
+            
+            if (/(adoptar|adopci[oó]n|quiero adoptar|busco mascota)/i.test(lowerMessage)) {
+                return '¡Qué bueno que quieres adoptar! Puedes ver las mascotas disponibles en adopción en la sección "Mascotas en Adopción". ¿Te gustaría que te muestre cómo llegar allí?';
+            }
+            
+            if (/(contacto|tel[ée]fono|email|correo|d[óo]nde est[aá]n|ubicaci[oó]n)/i.test(lowerMessage)) {
+                return 'Puedes contactarnos a través de:\n📧 contacto@mascotasperdidas.com\n📞 (123) 456-7890\n📍 Av. Principal #123, Ciudad\nHorario: Lunes a Viernes de 9am a 6pm';
+            }
+            
+            if (/(gracias|muchas gracias|te lo agradezco|agradecido)/i.test(lowerMessage)) {
+                return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
+            }
+            
+            if (/(adi[óo]s|chao|nos vemos|hasta luego|chau|bye)/i.test(lowerMessage)) {
+                return '¡Hasta luego! Recuerda que puedes volver cuando necesites ayuda con mascotas perdidas o en adopción.';
+            }
+            
+            // Si no coincide con ninguna categoría
+            const defaultResponses = [
+                'Disculpa, no estoy seguro de entender. ¿Podrías reformular tu pregunta?',
+                '¿Podrías darme más detalles sobre lo que necesitas?',
+                'Estoy aquí para ayudarte con mascotas perdidas, encontradas o en adopción. ¿En qué puedo asistirte?',
+                '¿Te refieres a alguna mascota perdida, encontrada o en adopción?'
+            ];
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+        
+        // Función para enviar mensaje
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            // Agregar mensaje del usuario
+            addMessage(message, true);
+            userInput.value = '';
+            
+            // Mostrar indicador de "escribiendo..."
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.textContent = 'El asistente está escribiendo...';
+            typingIndicator.style.fontStyle = 'italic';
+            typingIndicator.style.color = '#666';
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Simular tiempo de respuesta
+            setTimeout(() => {
+                // Eliminar indicador de "escribiendo..."
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    chatMessages.removeChild(indicator);
+                }
+                
+                // Obtener y mostrar respuesta
+                const response = getBotResponse(message);
+                // Dividir la respuesta en líneas para mejor formato
+                const lines = response.split('\n');
+                lines.forEach((line, index) => {
+                    // Pequeño retraso entre líneas para efecto de escritura
+                    setTimeout(() => {
+                        addMessage(line);
+                    }, index * 200);
+                });
+            }, 1000);
+        }
+        
+        // Función para agregar mensaje al chat
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.background = isUser ? '#e3f2fd' : '#f1f1f1';
+            messageDiv.style.padding = '10px';
+            messageDiv.style.borderRadius = '5px';
+            messageDiv.style.marginBottom = '10px';
+            messageDiv.style.maxWidth = '80%';
+            messageDiv.style.marginLeft = isUser ? 'auto' : '0';
+            messageDiv.style.marginRight = isUser ? '0' : 'auto';
+            messageDiv.textContent = message;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Animación del botón
+        setInterval(() => {
+            chatButton.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                chatButton.style.transform = 'scale(1)';
+            }, 1000);
+        }, 2000);
+    });
+    </script>
 </body>
 </html>

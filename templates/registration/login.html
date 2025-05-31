@@ -3,20 +3,48 @@
 {% block title %}Iniciar Sesión - Mascotas Perdidas{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-3">
                     <h3 class="mb-0">Iniciar Sesión</h3>
                 </div>
                 <div class="card-body p-4">
                     {% if form.errors %}
-                        <div class="alert alert-danger" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <strong>¡Error!</strong> Por favor, introduce un nombre de usuario y contraseña correctos.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                         </div>
                     {% endif %}
 
+                    <!-- Botones de autenticación social -->
+                    <div class="mb-4">
+                        <p class="text-center mb-3">Inicia sesión con tu red social favorita:</p>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-outline-danger w-100">
+                                    <i class="fab fa-google me-2"></i> Google
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'social:begin' 'facebook' %}" class="btn btn-outline-primary w-100">
+                                    <i class="fab fa-facebook-f me-2"></i> Facebook
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'social:begin' 'twitter' %}" class="btn btn-outline-info w-100">
+                                    <i class="fab fa-twitter me-2"></i> Twitter
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider d-flex align-items-center my-4">
+                        <p class="text-center fw-bold mx-3 mb-0 text-muted">O</p>
+                    </div>
+
+                    <!-- Formulario de inicio de sesión tradicional -->
                     <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
@@ -24,7 +52,10 @@
                         
                         <div class="mb-3">
                             <label for="id_username" class="form-label">Nombre de usuario o correo electrónico</label>
-                            <input type="text" name="username" class="form-control" id="id_username" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" name="username" class="form-control" id="id_username" required>
+                            </div>
                             <div class="invalid-feedback">
                                 Por favor, ingresa tu nombre de usuario o correo electrónico.
                             </div>
@@ -33,6 +64,7 @@
                         <div class="mb-3">
                             <label for="id_password" class="form-label">Contraseña</label>
                             <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                 <input type="password" name="password" class="form-control" id="id_password" required>
                                 <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password">
                                     <i class="fas fa-eye"></i>

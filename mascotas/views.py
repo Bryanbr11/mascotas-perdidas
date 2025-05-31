@@ -4,12 +4,45 @@ from django.contrib import messages, auth
 from django.contrib.auth import login, authenticate
 from django.core.paginator import Paginator
 from django.urls import reverse
-from django.http import HttpResponseForbidden, HttpResponse
-from django.views.generic import CreateView
+from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
+from django.views.generic import CreateView, TemplateView
 from django.contrib.auth.models import User
-from .models import Mascota
-from .forms import MascotaForm
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.mail import EmailMessage
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from social_django.utils import psa
+
+from .models import Mascota, PerfilUsuario
+from .forms import MascotaForm, PerfilUsuarioForm
 from .forms_auth import RegistroForm
+
+# Vista para redirigir después de la autenticación social
+def inicio_social_auth(request):
+    """
+    Redirige a los usuarios autenticados a la página principal.
+    Si no están autenticados, los redirige a la página de inicio de sesión.
+    """
+    if request.user.is_authenticated:
+        return redirect('mascotas:lista_mascotas')
+    return redirect('login')
+
+def error_social_auth(request):
+    """
+    Maneja los errores de autenticación social y redirige a la página de inicio de sesión
+    con un mensaje de error.
+    """
+    messages.error(request, 'Ocurrió un error durante la autenticación con la red social. Por favor, inténtalo de nuevo.')
+    return redirect('login')
+
+# Obtener el modelo de usuario personalizado si existe, de lo contrario usar el predeterminado
+User = get_user_model()
 
 def lista_mascotas(request):
     # Obtener todas las mascotas ordenadas por fecha de publicación
@@ -176,3 +209,77 @@ def registro(request):
         form = RegistroForm()
     
     return render(request, 'registration/registro.html', {'form': form})
+
+# Vista para el chatbot
+@csrf_exempt
+@require_http_methods(["POST"])
+def chatbot(request):
+    """
+    Maneja las peticiones del chatbot de asistencia.
+    """
+    try:
+        import json
+        import random
+        from django.http import JsonResponse
+        
+        data = json.loads(request.body)
+        user_message = data.get('message', '').lower()
+        
+        # Respuestas predefinidas
+        responses = {
+            'hola': '¡Hola! Soy tu asistente virtual de Mascotas Perdidas. ¿En qué puedo ayudarte hoy? 😊',
+            'cómo estás': '¡Estoy muy bien, gracias por preguntar! ¿En qué puedo ayudarte?',
+            'adiós': '¡Hasta luego! Si necesitas ayuda, aquí estaré. ¡Que tengas un gran día! 🐾',
+            'gracias': '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?',
+            'ayuda': 'Puedo ayudarte con:\n- Registro de cuenta\n- Inicio de sesión\n- Reportar mascotas perdidas\n- Preguntas frecuentes\n\n¿En qué necesitas ayuda?',
+            'registrarme': {
+                'response': '¡Claro! Para registrarte, haz clic en "Registrarse" en la esquina superior derecha o sigue este enlace:',
+                'action': 'redirect',
+                'url': '/accounts/registro/'
+            },
+            'iniciar sesión': {
+                'response': 'Puedes iniciar sesión haciendo clic en "Iniciar sesión" en la esquina superior derecha.',
+                'action': 'redirect',
+                'url': '/accounts/login/'
+            },
+            'olvidé mi contraseña': {
+                'response': 'No te preocupes, puedo ayudarte a restablecer tu contraseña. Te redirigiré a la página de recuperación.',
+                'action': 'redirect',
+                'url': '/accounts/password_reset/'
+            },
+            'reportar mascota perdida': {
+                'response': 'Para reportar una mascota perdida, primero inicia sesión y luego haz clic en "Reportar Mascota Perdida" en el menú principal.',
+                'action': 'redirect',
+                'url': '/nueva/'
+            },
+            'encontré una mascota': {
+                'response': '¡Gracias por querer ayudar! Para reportar una mascota encontrada, por favor inicia sesión y completa el formulario de reporte.',
+                'action': 'redirect',
+                'url': '/nueva/'
+            },
+            'contacto': 'Puedes contactarnos a través del formulario de contacto en la página principal o enviando un correo a contacto@mascotasperdidas.com',
+            'horario': 'Nuestro horario de atención es de lunes a viernes de 9:00 AM a 6:00 PM.',
+            'donar': '¡Gracias por tu interés en ayudar! Las donaciones nos permiten mantener el servicio. Puedes donar a través de...'
+        }
+
+        # Buscar respuesta coincidente
+        response = None
+        for key in responses:
+            if key in user_message:
+                response = responses[key]
+                break
+
+        # Si no se encontró coincidencia, usar una respuesta genérica
+        if not response:
+            generic_responses = [
+                "No estoy seguro de entender. ¿Podrías reformular tu pregunta?",
+                "Lo siento, no tengo información sobre eso. ¿Puedes ser más específico?",
+                "No estoy seguro de cómo responder a eso. ¿Te importaría preguntar de otra manera?",
+                "Voy a necesitar más información para ayudarte con eso. ¿Puedes darme más detalles?"
+            ]
+            response = random.choice(generic_responses)
+
+        return JsonResponse({'response': response} if isinstance(response, str) else response)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

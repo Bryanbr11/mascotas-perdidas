@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from . import views
 from .views_test import test_view
 
@@ -14,4 +15,7 @@ urlpatterns = [
     path('<int:mascota_id>/eliminar/', login_required(views.eliminar_mascota), name='eliminar_mascota'),
     path('<int:mascota_id>/encontrada/', login_required(views.marcar_encontrada), name='marcar_encontrada'),
     path('mis-mascotas/', login_required(views.mis_mascotas), name='mis_mascotas'),
+    
+    # API para el chatbot
+    path('api/chatbot/', csrf_exempt(views.chatbot), name='chatbot'),
 ]

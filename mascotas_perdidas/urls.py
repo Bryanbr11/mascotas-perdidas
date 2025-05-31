@@ -15,11 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from mascotas.views import registro
+from django.views.generic import TemplateView
+from django.views.decorators.csrf import csrf_exempt
+from mascotas.views import registro, inicio_social_auth, error_social_auth, chatbot
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +36,19 @@ urlpatterns = [
     
     # URLs de autenticación de Django
     path('accounts/', include('django.contrib.auth.urls')),  # Incluye URLs como password_reset, etc.
+    
+    # URLs para autenticación social
+    path('social-auth/', include('social_django.urls', namespace='social')),
+    path('inicio-social/', inicio_social_auth, name='inicio_social_auth'),
+    path('error-social/', error_social_auth, name='error_social_auth'),
+    
+    # Páginas de autenticación
+    path('auth/', include('django.contrib.auth.urls')),
+    path('auth/registro/completar-perfil/', TemplateView.as_view(template_name='registration/complete_profile.html'), 
+         name='complete_profile'),
+    
+    # API para el chatbot
+    path('api/chatbot/', csrf_exempt(chatbot), name='chatbot'),
 ]
 
 # Servir archivos estáticos y multimedia en desarrollo

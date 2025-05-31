@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Completa tu perfil - Mascotas Perdidas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Completa tu perfil</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">
+                        ¡Gracias por registrarte! Por favor, completa la siguiente información para personalizar tu experiencia.
+                    </p>
+                    
+                    <div class="text-center mb-4">
+                        {% if form.foto_perfil.value %}
+                            <img src="{{ form.foto_perfil.value.url }}" alt="Foto de perfil" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="mx-auto mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; font-size: 4rem;">
+                                <i class="fas fa-user text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.telefono|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.fecha_nacimiento|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.ciudad|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.pais|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        {{ form.direccion|as_crispy_field }}
+                        
+                        <div class="form-group">
+                            <label>Foto de perfil</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="id_foto_perfil" name="foto_perfil" accept="image/*">
+                                <label class="custom-file-label" for="id_foto_perfil">
+                                    {% if form.foto_perfil.value %}
+                                        {{ form.foto_perfil.value }}
+                                    {% else %}
+                                        Seleccionar archivo...
+                                    {% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        
+                        {{ form.biografia|as_crispy_field }}
+                        
+                        <div class="form-group">
+                            <label class="d-block">Redes sociales (opcional)</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                </div>
+                                {{ form.sitio_web }}
+                            </div>
+                            
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text text-primary"><i class="fab fa-twitter"></i></span>
+                                </div>
+                                {{ form.twitter }}
+                            </div>
+                            
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text text-primary"><i class="fab fa-facebook"></i></span>
+                                </div>
+                                {{ form.facebook }}
+                            </div>
+                            
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text text-danger"><i class="fab fa-instagram"></i></span>
+                                </div>
+                                {{ form.instagram }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-save mr-2"></i> Guardar perfil
+                            </button>
+                            <a href="{% url 'mascotas:lista_mascotas' %}" class="btn btn-outline-secondary btn-lg ml-2">
+                                Completar más tarde
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Actualizar la etiqueta del archivo de carga
+$('input[type="file"]').change(function(e) {
+    var fileName = e.target.files[0] ? e.target.files[0].name : 'Seleccionar archivo...';
+    $(this).next('.custom-file-label').html(fileName);
+    
+    // Mostrar vista previa de la imagen
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        
+        reader.onload = function(e) {
+            $('.rounded-circle').attr('src', e.target.result);
+        }
+        
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+</script>
+{% endblock %}
