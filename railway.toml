@@ -6,8 +6,8 @@
 [deploy]
   startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:$PORT"
   healthcheckPath = "/"
-  healthcheckTimeout = 60
-  restartDelay = 10
+  healthcheckTimeout = 120
+  restartDelay = 30
   restartMax = 5
   restartTimeout = 300
   restartWindow = 600
@@ -28,7 +28,7 @@
   CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
   
   # Configuración de la base de datos
-  DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/railway"
+  # La URL de la base de datos será proporcionada automáticamente por Railway
   
   # Configuración de logs
   PYTHONUNBUFFERED = "1"
@@ -36,3 +36,6 @@
   
   # Puerto
   PORT = "8000"
+  
+  # Configuración de WhiteNoise
+  STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
