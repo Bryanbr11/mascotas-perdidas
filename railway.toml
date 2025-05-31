@@ -6,7 +6,7 @@
 [deploy]
   startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:$PORT"
   healthcheckPath = "/"
-  healthcheckTimeout = 120
+  healthcheckTimeout = 300  # Aumentar el tiempo de espera del healthcheck
   restartDelay = 30
   restartMax = 5
   restartTimeout = 300
@@ -21,7 +21,7 @@
 
 [deploy.environment]
   # Configuración de Django
-  DEBUG = "False"
+  DEBUG = "True"  # Temporalmente en True para depuración
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
   SECRET_KEY = "your-secret-key-here"  # Asegúrate de reemplazarlo con una clave segura
   ALLOWED_HOSTS = "*"
