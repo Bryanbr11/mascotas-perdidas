@@ -3,9 +3,9 @@
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "gunicorn mascotas_perdidas.wsgi --log-file -"
+  startCommand = "gunicorn mascotas_perdidas.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --log-level=info --log-file -"
   healthcheckPath = "/"
-  healthcheckTimeout = 100
+  healthcheckTimeout = 30
   restartDelay = 5
   restartMax = 3
   restartTimeout = 60
@@ -23,3 +23,5 @@
   PYTHONUNBUFFERED = "1"
   PYTHONPATH = "/app"
   PYTHON_VERSION = "3.11.4"
+  DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
+  PORT = "8000"
