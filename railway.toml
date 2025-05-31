@@ -1,27 +1,30 @@
 [build]
-  command = "python manage.py migrate && python manage.py collectstatic --noinput"
+  command = "chmod +x entrypoint.sh && python manage.py check --deploy"
   publish = "staticfiles"
 
 [deploy]
-  startCommand = "gunicorn mascotas_perdidas.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --log-level=info --log-file -"
+  startCommand = "./entrypoint.sh"
   healthcheckPath = "/"
-  healthcheckTimeout = 30
+  healthcheckTimeout = 60  # Aumentar el tiempo de espera
   restartDelay = 5
   restartMax = 3
-  restartTimeout = 60
-  restartWindow = 60
+  restartTimeout = 120  # Aumentar el tiempo de espera
+  restartWindow = 120   # Aumentar la ventana de reinicio
   zeroDowntime = true
 
 [build.environment]
   PYTHONUNBUFFERED = "1"
   PYTHONPATH = "/app"
   PYTHON_VERSION = "3.11.4"
+  NODE_VERSION = "16"
 
 [deploy.environment]
   DEBUG = "False"
-  DISABLE_COLLECTSTATIC = "1"
+  DISABLE_COLLECTSTATIC = "0"  # Habilitar collectstatic
   PYTHONUNBUFFERED = "1"
   PYTHONPATH = "/app"
   PYTHON_VERSION = "3.11.4"
   DJANGO_SETTINGS_MODULE = "mascotas_perdidas.settings"
   PORT = "8000"
+  ALLOWED_HOSTS = "*"
+  CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
